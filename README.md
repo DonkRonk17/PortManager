@@ -1,3 +1,5 @@
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/2af68eb0-940e-4456-bcb5-60fedaf28706" />
+
 # 🔌 PortManager
 
 **Smart SSH Connection & Port Forwarding Manager**
@@ -320,6 +322,9 @@ python portmanager.py forward db 27017 27017  # MongoDB
 
 ### Connect Options
 - `--background` / `-b` - Run in background
+
+<img width="1536" height="522" alt="image" src="https://github.com/user-attachments/assets/41d10193-4de1-47a0-842d-840ee9f34523" />
+
 
 ## 🤝 Contributing
 
