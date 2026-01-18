@@ -343,6 +343,14 @@ Part of the **AutoProjects** suite:
 
 ---
 
+## 🙏 Credits
+
+Created by **Randell Logan Smith and Team Brain** at [Metaphy LLC](https://metaphysicsandcomputing.com)
+
+Part of the HMSS (Heavenly Morning Star System) ecosystem.
+
+---
+
 **Created by:** Holy Grail Automation  
 **Version:** 1.0.0  
 **Zero Dependencies** | **Cross-Platform** | **Open Source**
