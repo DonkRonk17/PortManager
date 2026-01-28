@@ -1,0 +1,224 @@
+================================================================================
+                        PORTMANAGER CHEAT SHEET
+================================================================================
+
+QUICK START
+-----------
+1. Clone: git clone https://github.com/DonkRonk17/PortManager.git
+2. Use: python portmanager.py --help
+3. Add: python portmanager.py add myserver user@host
+
+================================================================================
+PROFILE MANAGEMENT
+--------------------------------------------------------------------------------
+
+ADD PROFILE:
+  python portmanager.py add NAME user@host
+  python portmanager.py add NAME user@host --port 2222
+  python portmanager.py add NAME user@host --key ~/.ssh/id_rsa
+  python portmanager.py add NAME user@host --port 2222 --key ~/.ssh/key
+
+LIST PROFILES:
+  python portmanager.py list
+
+DELETE PROFILE:
+  python portmanager.py delete NAME
+
+================================================================================
+PORT FORWARDING
+--------------------------------------------------------------------------------
+
+LOCAL FORWARD (access remote service locally):
+  python portmanager.py forward NAME LOCAL_PORT REMOTE_PORT
+  python portmanager.py forward NAME 8080 80
+  python portmanager.py forward NAME 5432 5432 --host db.internal
+
+REMOTE FORWARD (expose local service remotely):
+  python portmanager.py forward NAME LOCAL_PORT REMOTE_PORT --remote
+  python portmanager.py forward NAME 3000 3000 --remote
+
+COMMON FORWARDS:
+  Web Server:        forward NAME 80 80
+  HTTPS:             forward NAME 443 443
+  PostgreSQL:        forward NAME 5432 5432
+  MySQL:             forward NAME 3306 3306
+  MongoDB:           forward NAME 27017 27017
+  Redis:             forward NAME 6379 6379
+  Elasticsearch:     forward NAME 9200 9200
+  Kibana:            forward NAME 5601 5601
+  Grafana:           forward NAME 3000 3000
+  React/Vite:        forward NAME 3000 3000
+  Flask:             forward NAME 5000 5000
+  Django:            forward NAME 8000 8000
+  VNC:               forward NAME 5900 5900
+
+================================================================================
+CONNECTING
+--------------------------------------------------------------------------------
+
+INTERACTIVE (opens SSH session):
+  python portmanager.py connect NAME
+
+BACKGROUND (tunnel only, returns to prompt):
+  python portmanager.py connect NAME --background
+  python portmanager.py connect NAME -b
+
+SHOW ACTIVE CONNECTIONS:
+  python portmanager.py active
+
+================================================================================
+SSH COMMAND EQUIVALENTS
+--------------------------------------------------------------------------------
+
+PortManager builds these commands for you:
+
+  # Basic connection
+  portmanager connect server
+  # Equivalent: ssh user@host
+
+  # With custom port
+  portmanager add server user@host --port 2222
+  # Equivalent: ssh -p 2222 user@host
+
+  # With key
+  portmanager add server user@host --key ~/.ssh/key
+  # Equivalent: ssh -i ~/.ssh/key user@host
+
+  # With local forward
+  portmanager forward server 8080 80
+  # Equivalent: ssh -L 8080:localhost:80 user@host
+
+  # With forward to internal host
+  portmanager forward server 9200 9200 --host elastic.internal
+  # Equivalent: ssh -L 9200:elastic.internal:9200 user@host
+
+  # With remote forward
+  portmanager forward server 3000 3000 --remote
+  # Equivalent: ssh -R 3000:localhost:3000 user@host
+
+================================================================================
+PYTHON API
+--------------------------------------------------------------------------------
+
+IMPORT:
+  from portmanager import (
+      add_profile, delete_profile, list_profiles,
+      add_forward, connect, show_active,
+      build_ssh_command, load_profiles
+  )
+
+ADD PROFILE:
+  add_profile('server', 'example.com', 'admin', port=22, key='~/.ssh/key')
+
+ADD FORWARD:
+  add_forward('server', 8080, 80)
+  add_forward('server', 3000, 3000, forward_type='remote')
+  add_forward('server', 5432, 5432, remote_host='db.internal')
+
+CONNECT:
+  connect('server')                  # Interactive
+  connect('server', background=True) # Background
+
+BUILD COMMAND:
+  profile = load_profiles()['server']
+  cmd = build_ssh_command(profile)
+  print(' '.join(cmd))
+
+================================================================================
+CONFIGURATION
+--------------------------------------------------------------------------------
+
+FILES LOCATION:
+  Windows: C:\Users\<username>\.portmanager\
+  macOS:   ~/.portmanager/
+  Linux:   ~/.portmanager/
+
+FILES:
+  profiles.json          Saved SSH profiles
+  active_connections.json Active background connections
+
+================================================================================
+COMMON PATTERNS
+--------------------------------------------------------------------------------
+
+DATABASE ACCESS:
+  portmanager add prod-db admin@db.server --key ~/.ssh/db
+  portmanager forward prod-db 5432 5432
+  portmanager connect prod-db -b
+  psql -h localhost -p 5432 -U admin database
+
+BASTION/JUMP HOST:
+  portmanager add bastion ops@bastion.company.com --key ~/.ssh/bastion
+  portmanager forward bastion 9200 9200 --host elastic.internal
+  portmanager forward bastion 5601 5601 --host kibana.internal
+  portmanager connect bastion -b
+
+MULTIPLE ENVIRONMENTS:
+  portmanager add dev dev@dev.server
+  portmanager add staging deploy@staging.server
+  portmanager add prod deploy@prod.server
+  
+  # Use different local ports to connect to all:
+  portmanager forward dev 5432 5432
+  portmanager forward staging 5433 5432
+  portmanager forward prod 5434 5432
+
+EXPOSE LOCAL SERVICE:
+  portmanager add demo user@demo.server
+  portmanager forward demo 3000 8080 --remote
+  portmanager connect demo -b
+  # Now demo.server:8080 points to your localhost:3000
+
+================================================================================
+TROUBLESHOOTING
+--------------------------------------------------------------------------------
+
+"Profile not found":
+  portmanager list   # See available profiles
+
+"Permission denied (publickey)":
+  ssh-add ~/.ssh/your_key   # Add key to ssh-agent
+  # Or specify key when creating profile:
+  portmanager add NAME user@host --key ~/.ssh/your_key
+
+"Port already in use":
+  portmanager active   # Check active connections
+  netstat -an | grep PORT   # Check system processes
+
+"Connection refused":
+  # Test direct SSH first:
+  ssh -v user@host
+
+"Address already in use":
+  # Another process using the local port
+  # Use different local port:
+  portmanager forward NAME 8081 80  # Instead of 8080
+
+================================================================================
+ALIASES (optional setup)
+--------------------------------------------------------------------------------
+
+BASH/ZSH (~/.bashrc or ~/.zshrc):
+  alias pm='python /path/to/portmanager.py'
+  alias pmc='python /path/to/portmanager.py connect'
+  alias pml='python /path/to/portmanager.py list'
+  alias pmf='python /path/to/portmanager.py forward'
+
+POWERSHELL ($PROFILE):
+  function pm { python C:\path\to\portmanager.py $args }
+  function pmc { python C:\path\to\portmanager.py connect $args }
+  function pml { python C:\path\to\portmanager.py list }
+
+================================================================================
+RESOURCES
+--------------------------------------------------------------------------------
+
+Documentation:   AutoProjects/PortManager/README.md
+Examples:        AutoProjects/PortManager/EXAMPLES.md
+Integration:     AutoProjects/PortManager/INTEGRATION_PLAN.md
+GitHub:          https://github.com/DonkRonk17/PortManager
+Issues:          https://github.com/DonkRonk17/PortManager/issues
+
+================================================================================
+Questions? Check the docs or ask in Team Brain Synapse!
+================================================================================
